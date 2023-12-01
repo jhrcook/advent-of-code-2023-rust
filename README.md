@@ -7,8 +7,8 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 | Day | Code                                                     | Stars |
-| ---:| -------------------------------------------------------- | ----- |
-| 1   | [src/solutions/day01.rs](src/solutions/day01.rs) |    |
+| ---:| -------------------------------------------------------- |:-----:|
+| 1   | [src/solutions/day01.rs](src/solutions/day01.rs)         | ⭐️⭐️   |
 <!-- | 2   | [src/solutions/day02.rs](src/solutions/day02.rs) | ⭐️⭐️   | -->
 <!-- | 3   | [src/solutions/day03.rs](src/solutions/day03.rs) | ⭐️⭐️   | -->
 <!-- | 4   | [src/solutions/day04.rs](src/solutions/day04.rs) | ⭐️⭐️   | -->
