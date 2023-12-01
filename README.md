@@ -1,9 +1,9 @@
 # Advent of Code 2023 solutions in Rust
 
-**My solutions to the [Advent of Code 2022](https://adventofcode.com/2022) using Rust.**
+**My solutions to the [Advent of Code 2023](https://adventofcode.com/2023) using Rust.**
 
 [![advent-of-code](https://img.shields.io/badge/Advent_of_Code-2023-F80046.svg?style=flat)](https://adventofcode.com)
-[![rust](https://img.shields.io/badge/Rust-1.73.0-000000.svg?style=flat&logo=rust)](https://www.python.org)
+[![rust](https://img.shields.io/badge/Rust-1.74.0-000000.svg?style=flat&logo=rust)](https://www.python.org)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 | Day | Code                                                     | Stars |
