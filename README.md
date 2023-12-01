@@ -52,7 +52,7 @@ cargo run --release -- --day 1
 Full install and run:
 
 ```bash
-cargo install .
-advent-of-code-2023-rust
-advent-of-code-2023-rust --day 1
+cargo install --path .
+aoc-2023
+aoc-2023 --day 1
 ```

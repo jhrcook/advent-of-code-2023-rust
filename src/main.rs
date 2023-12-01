@@ -1,4 +1,4 @@
-use advent_of_code_2023_rust::{run_all, run_day};
+use aoc_2023::{run_all, run_day};
 use clap::Parser;
 use std::time::Instant;
 
