@@ -1,22 +1,17 @@
 use crate::data::load;
-use lazy_static::lazy_static;
 use regex::Regex;
-use std::{collections::HashMap, num::ParseIntError};
+use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
 pub enum PuzzleError {
-    #[error("Failed parsing integer.")]
-    ParseIntError(#[from] ParseIntError),
     #[error("Could not locate digit.")]
     NoDigits,
 }
 
 fn extract_digits_1(text: &str) -> Vec<isize> {
-    lazy_static! {
-        static ref DIGIT_REGEX: Regex = Regex::new(r"[0-9]").unwrap();
-    }
-    DIGIT_REGEX
+    Regex::new(r"[0-9]")
+        .unwrap()
         .find_iter(text)
         .map(|mat| mat.as_str().parse::<isize>().unwrap())
         .collect()
