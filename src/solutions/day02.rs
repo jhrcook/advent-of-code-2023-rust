@@ -1,9 +1,10 @@
 use crate::data::load;
 use regex::Regex;
+use std::cmp::max;
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
-pub enum PuzzleError {
+pub enum PuzzleErr {
     #[error("Could not parse game: '{}'.", .0)]
     GameParsingError(String),
     #[error("Could not parse game info: '{}'.", .0)]
@@ -14,33 +15,33 @@ pub enum PuzzleError {
 
 #[derive(Debug, Clone)]
 enum Cube {
-    Blue(u32),
-    Red(u32),
-    Green(u32),
+    R(u32),
+    B(u32),
+    G(u32),
 }
 
 impl Cube {
-    fn from_input(input: &str) -> Result<Self, PuzzleError> {
+    fn from_input(input: &str) -> Result<Self, PuzzleErr> {
         let Some(caps) = Regex::new(r"(?<n>\d+) (?<color>\w+)")
             .unwrap()
             .captures(input)
         else {
-            return Err(PuzzleError::CubeParsingError(input.to_string()));
+            return Err(PuzzleErr::CubeParsingError(input.to_string()));
         };
-        let n = &caps["n"].parse::<u32>().unwrap();
+        let n = caps["n"].parse::<u32>().unwrap();
         match &caps["color"] {
-            "blue" => Ok(Cube::Blue(*n)),
-            "red" => Ok(Cube::Red(*n)),
-            "green" => Ok(Cube::Green(*n)),
-            _ => Err(PuzzleError::CubeParsingError(input.to_string())),
+            "red" => Ok(Cube::R(n)),
+            "blue" => Ok(Cube::B(n)),
+            "green" => Ok(Cube::G(n)),
+            _ => Err(PuzzleErr::CubeParsingError(input.to_string())),
         }
     }
 
     fn n(&self) -> u32 {
         match self {
-            Cube::Blue(n) => *n,
-            Cube::Red(n) => *n,
-            Cube::Green(n) => *n,
+            Cube::R(n) => *n,
+            Cube::B(n) => *n,
+            Cube::G(n) => *n,
         }
     }
 }
@@ -53,23 +54,19 @@ struct Game {
 
 impl Game {
     fn minimum_cubes(&self) -> Vec<Cube> {
-        let (mut min_blue, mut min_red, mut min_green) = (0, 0, 0);
+        let (mut min_b, mut min_r, mut min_g) = (0, 0, 0);
         for cube in self.info.iter().flatten() {
             match cube {
-                Cube::Blue(n) => min_blue = std::cmp::max(*n, min_blue),
-                Cube::Red(n) => min_red = std::cmp::max(*n, min_red),
-                Cube::Green(n) => min_green = std::cmp::max(*n, min_green),
+                Cube::R(n) => min_r = max(*n, min_r),
+                Cube::B(n) => min_b = max(*n, min_b),
+                Cube::G(n) => min_g = max(*n, min_g),
             };
         }
-        Vec::from_iter([
-            Cube::Blue(min_blue),
-            Cube::Red(min_red),
-            Cube::Green(min_green),
-        ])
+        Vec::from_iter([Cube::B(min_b), Cube::R(min_r), Cube::G(min_g)])
     }
 }
 
-fn parse_game_info_piece(info_str: &str) -> Result<Vec<Cube>, PuzzleError> {
+fn parse_game_info_piece(info_str: &str) -> Result<Vec<Cube>, PuzzleErr> {
     info_str
         .trim()
         .split(',')
@@ -77,24 +74,24 @@ fn parse_game_info_piece(info_str: &str) -> Result<Vec<Cube>, PuzzleError> {
         .collect()
 }
 
-fn prase_input_line(input_line: &str) -> Result<Game, PuzzleError> {
+fn prase_input_line(input_line: &str) -> Result<Game, PuzzleErr> {
     let Some(caps) = Regex::new(r"Game (?<id>\d+):")
         .unwrap()
         .captures(input_line)
     else {
-        return Err(PuzzleError::GameParsingError(input_line.to_string()));
+        return Err(PuzzleErr::GameParsingError(input_line.to_string()));
     };
     let id = &caps["id"].parse::<u32>().unwrap();
 
     let info = input_line.split(": ").collect::<Vec<_>>()[1]
         .split(';')
         .map(parse_game_info_piece)
-        .collect::<Result<Vec<Vec<Cube>>, PuzzleError>>()?;
+        .collect::<Result<Vec<Vec<Cube>>, PuzzleErr>>()?;
 
     Ok(Game { id: *id, info })
 }
 
-fn parse_input(input_data: &str) -> Result<Vec<Game>, PuzzleError> {
+fn parse_input(input_data: &str) -> Result<Vec<Game>, PuzzleErr> {
     input_data
         .trim()
         .lines()
@@ -102,29 +99,28 @@ fn parse_input(input_data: &str) -> Result<Vec<Game>, PuzzleError> {
         .collect()
 }
 
-pub fn puzzle_1(input_data: &str) -> Result<u32, PuzzleError> {
+pub fn puzzle_1(input_data: &str) -> Result<u32, PuzzleErr> {
     let games = parse_input(input_data)?;
-    let mut tally = 0;
-    // only 12 red cubes, 13 green cubes, and 14 blue cubes
+    let mut s = 0;
     'game: for game in games {
         for info in game.info {
             for cube in info {
                 let is_possible = match cube {
-                    Cube::Blue(n) => n <= 14,
-                    Cube::Red(n) => n <= 12,
-                    Cube::Green(n) => n <= 13,
+                    Cube::R(n) => n <= 12,
+                    Cube::B(n) => n <= 14,
+                    Cube::G(n) => n <= 13,
                 };
                 if !is_possible {
                     continue 'game;
                 }
             }
         }
-        tally += game.id;
+        s += game.id;
     }
-    Ok(tally)
+    Ok(s)
 }
 
-pub fn puzzle_2(input_data: &str) -> Result<u32, PuzzleError> {
+pub fn puzzle_2(input_data: &str) -> Result<u32, PuzzleErr> {
     Ok(parse_input(input_data)?
         .iter()
         .map(|g| g.minimum_cubes().iter().map(|c| c.n()).product::<u32>())

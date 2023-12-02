@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
-pub enum PuzzleError {
+pub enum PuzzleErr {
     #[error("Could not locate digit.")]
     NoDigits,
 }
@@ -50,31 +50,31 @@ fn extract_digits_2(text: &str) -> Vec<isize> {
     digits.iter().flatten().cloned().collect::<Vec<_>>()
 }
 
-fn make_calibration_number(digits: &[isize]) -> Result<isize, PuzzleError> {
-    Ok(digits.first().ok_or(PuzzleError::NoDigits)? * 10
-        + digits.last().ok_or(PuzzleError::NoDigits)?)
+fn make_calibration_number(digits: &[isize]) -> Result<isize, PuzzleErr> {
+    Ok(digits.first().ok_or(PuzzleErr::NoDigits)? * 10
+        + digits.last().ok_or(PuzzleErr::NoDigits)?)
 }
 
 fn calc_total_calibration(
     input_data: &str,
     extraction_func: fn(&str) -> Vec<isize>,
-) -> Result<isize, PuzzleError> {
+) -> Result<isize, PuzzleErr> {
     let total = input_data
         .trim()
         .lines()
         .map(|a| a.trim())
         .map(|line| make_calibration_number(&extraction_func(line)))
-        .collect::<Result<Vec<isize>, PuzzleError>>()?
+        .collect::<Result<Vec<isize>, PuzzleErr>>()?
         .iter()
         .sum();
     Ok(total)
 }
 
-pub fn puzzle_1(input_data: &str) -> Result<isize, PuzzleError> {
+pub fn puzzle_1(input_data: &str) -> Result<isize, PuzzleErr> {
     calc_total_calibration(input_data, extract_digits_1)
 }
 
-pub fn puzzle_2(input_data: &str) -> Result<isize, PuzzleError> {
+pub fn puzzle_2(input_data: &str) -> Result<isize, PuzzleErr> {
     calc_total_calibration(input_data, extract_digits_2)
 }
 
