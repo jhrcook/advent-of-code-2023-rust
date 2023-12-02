@@ -3,7 +3,7 @@ pub mod solutions;
 
 pub fn run_all(data_dir: &str) {
     solutions::day01::main(data_dir);
-    // solutions::day02::main(data_dir);
+    solutions::day02::main(data_dir);
     // solutions::day03::main(data_dir);
     // solutions::day04::main(data_dir);
     // solutions::day05::main(data_dir);
@@ -32,7 +32,7 @@ pub fn run_all(data_dir: &str) {
 pub fn run_day(data_dir: &str, day: &usize) {
     match day {
         1 => solutions::day01::main(data_dir),
-        // 2 => solutions::day02::main(data_dir),
+        2 => solutions::day02::main(data_dir),
         // 3 => solutions::day03::main(data_dir),
         // 4 => solutions::day04::main(data_dir),
         // 5 => solutions::day05::main(data_dir),
