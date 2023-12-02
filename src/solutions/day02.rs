@@ -35,6 +35,14 @@ impl Cube {
             _ => Err(PuzzleError::CubeParsingError(input.to_string())),
         }
     }
+
+    fn n(&self) -> u32 {
+        match self {
+            Cube::Blue(n) => *n,
+            Cube::Red(n) => *n,
+            Cube::Green(n) => *n,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -43,8 +51,25 @@ struct Game {
     info: Vec<Vec<Cube>>,
 }
 
+impl Game {
+    fn minimum_cubes(&self) -> Vec<Cube> {
+        let (mut min_blue, mut min_red, mut min_green) = (0, 0, 0);
+        for cube in self.info.iter().flatten() {
+            match cube {
+                Cube::Blue(n) => min_blue = std::cmp::max(*n, min_blue),
+                Cube::Red(n) => min_red = std::cmp::max(*n, min_red),
+                Cube::Green(n) => min_green = std::cmp::max(*n, min_green),
+            };
+        }
+        Vec::from_iter([
+            Cube::Blue(min_blue),
+            Cube::Red(min_red),
+            Cube::Green(min_green),
+        ])
+    }
+}
+
 fn parse_game_info_piece(info_str: &str) -> Result<Vec<Cube>, PuzzleError> {
-    log::debug!("Parsing info string: {}", info_str);
     info_str
         .trim()
         .split(',')
@@ -60,7 +85,6 @@ fn prase_input_line(input_line: &str) -> Result<Game, PuzzleError> {
         return Err(PuzzleError::GameParsingError(input_line.to_string()));
     };
     let id = &caps["id"].parse::<u32>().unwrap();
-    log::debug!("game ID: {}", id);
 
     let info = input_line.split(": ").collect::<Vec<_>>()[1]
         .split(';')
@@ -100,6 +124,13 @@ pub fn puzzle_1(input_data: &str) -> Result<u32, PuzzleError> {
     Ok(tally)
 }
 
+pub fn puzzle_2(input_data: &str) -> Result<u32, PuzzleError> {
+    Ok(parse_input(input_data)?
+        .iter()
+        .map(|g| g.minimum_cubes().iter().map(|c| c.n()).product::<u32>())
+        .sum())
+}
+
 pub fn main(data_dir: &str) {
     println!("Day 2: Cube Conundrum");
     let data = load(data_dir, 2, None);
@@ -110,13 +141,13 @@ pub fn main(data_dir: &str) {
         Ok(x) => println!(" Puzzle 1: {}", x),
         Err(e) => panic!("No solution to puzzle 1: {}.", e),
     }
-    // assert_eq!(answer_1, Ok(56042));
+    assert_eq!(answer_1, Ok(2679));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(55358))
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
+    assert_eq!(answer_2, Ok(77607))
 }

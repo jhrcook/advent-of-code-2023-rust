@@ -1,4 +1,4 @@
-use aoc_2023::solutions::day02::puzzle_1;
+use aoc_2023::solutions::day02::{puzzle_1, puzzle_2};
 
 const EXAMPLE_INPUT: &str = "
 Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
@@ -14,7 +14,7 @@ fn example_1_puzzle_1() {
     assert_eq!(puzzle_1(self::EXAMPLE_INPUT), Ok(8));
 }
 
-// #[test]
-// fn example_1_puzzle_2() {
-//     assert_eq!(puzzle_2(self::EXAMPLE_INPUT_2), Ok(281));
-// }
+#[test]
+fn example_1_puzzle_2() {
+    assert_eq!(puzzle_2(self::EXAMPLE_INPUT), Ok(2286));
+}
