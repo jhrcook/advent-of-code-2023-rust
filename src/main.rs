@@ -11,11 +11,17 @@ struct Args {
     data_dir: String,
     #[arg(short, long)]
     day: Option<usize>,
+    #[arg(long)]
+    empty: bool,
 }
 
 fn main() {
     let args = Args::parse();
     let start = Instant::now();
+    if args.empty {
+        println!("Empty run.");
+        return;
+    }
     match args.day {
         Some(d) => {
             println!("Running puzzle {}.", d);
@@ -27,6 +33,5 @@ fn main() {
         }
     };
     let duration = start.elapsed();
-    print!("Done! 🎉");
-    println!(" -- Elapsed time: {:?}", duration);
+    println!("Done! 🎉 -- Elapsed time: {:?}", duration);
 }
