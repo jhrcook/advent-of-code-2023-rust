@@ -7,11 +7,19 @@ use std::time::Instant;
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Data directory.
-    #[arg(default_value_t = String::from("puzzle-input"))]
+    #[arg(default_value_t = String::from("puzzle-input"), help="Directory with input data files.")]
     data_dir: String,
-    #[arg(short, long)]
+    #[arg(
+        short,
+        long,
+        help = "Specific day to execute (runs all if not specified, default)."
+    )]
     day: Option<usize>,
-    #[arg(long)]
+    #[arg(
+        short,
+        long,
+        help = "Do not run any puzzles (to estimate start-up time)."
+    )]
     empty: bool,
 }
 
