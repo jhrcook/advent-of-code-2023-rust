@@ -55,29 +55,29 @@ impl PartNum {
 }
 
 fn extract_part_nums_from_line(line: &str, row: &i32) -> Result<Vec<PartNum>, PuzzleErr> {
-    let mut part_nums = Vec::new();
-    let digit_regex = Regex::new(r"\d").unwrap();
-    let mut part_num_comps: Vec<(Coord, char)> = Vec::new();
+    let mut pns = Vec::new();
+    let digit_re = Regex::new(r"\d").unwrap();
+    let mut pn_comps: Vec<(Coord, char)> = Vec::new();
     for (i, c) in line.chars().enumerate() {
-        if digit_regex.is_match(&c.to_string()) {
-            part_num_comps.push((
+        if digit_re.is_match(&c.to_string()) {
+            pn_comps.push((
                 Coord {
                     r: *row,
                     c: i as i32,
                 },
                 c,
             ))
-        } else if !part_num_comps.is_empty() {
-            part_nums.push(PartNum::from_components(&part_num_comps));
-            part_num_comps = Vec::new();
+        } else if !pn_comps.is_empty() {
+            pns.push(PartNum::from_components(&pn_comps));
+            pn_comps = Vec::new();
         }
     }
 
-    if !part_num_comps.is_empty() {
-        part_nums.push(PartNum::from_components(&part_num_comps));
+    if !pn_comps.is_empty() {
+        pns.push(PartNum::from_components(&pn_comps));
     }
 
-    Ok(part_nums)
+    Ok(pns)
 }
 
 fn extract_symbols(input_data: &str) -> Result<HashMap<Coord, char>, PuzzleErr> {
@@ -121,8 +121,29 @@ pub fn puzzle_1(input_data: &str) -> Result<i32, PuzzleErr> {
         .sum())
 }
 
+fn get_neighbors(coord: &Coord, part_nums: &[PartNum]) -> Vec<PartNum> {
+    let symbols = HashMap::from_iter([(*coord, '*')]);
+    part_nums
+        .iter()
+        .filter(|p| p.is_near_symbol(&symbols))
+        .cloned()
+        .collect()
+}
+
 pub fn puzzle_2(input_data: &str) -> Result<i32, PuzzleErr> {
-    Ok(0)
+    let (part_nums, symbols) = parse_input(input_data)?;
+    Ok(symbols
+        .iter()
+        .filter(|(_, s)| s == &&'*')
+        .map(|(c, _)| {
+            let pn = get_neighbors(c, &part_nums);
+            if pn.len() == 2 {
+                pn[0].val * pn[1].val
+            } else {
+                0
+            }
+        })
+        .sum())
 }
 
 pub fn main(data_dir: &str) {
@@ -143,5 +164,5 @@ pub fn main(data_dir: &str) {
         Ok(x) => println!(" Puzzle 2: {}", x),
         Err(e) => panic!("No solution to puzzle 2: {}", e),
     }
-    // assert_eq!(answer_2, Ok(77607))
+    assert_eq!(answer_2, Ok(72246648))
 }

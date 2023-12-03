@@ -1,4 +1,4 @@
-use aoc_2023::solutions::day03::puzzle_1;
+use aoc_2023::solutions::day03::{puzzle_1, puzzle_2};
 
 const EXAMPLE_INPUT: &str = "
 467..114..
@@ -29,7 +29,7 @@ fn example_2_puzzle_1() {
     assert_eq!(puzzle_1(self::EXAMPLE_INPUT_2), Ok(8982));
 }
 
-// #[test]
-// fn example_1_puzzle_2() {
-//     assert_eq!(puzzle_2(self::EXAMPLE_INPUT), Ok(2286));
-// }
+#[test]
+fn example_1_puzzle_2() {
+    assert_eq!(puzzle_2(self::EXAMPLE_INPUT), Ok(467835));
+}
