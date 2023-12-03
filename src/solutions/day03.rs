@@ -1,7 +1,7 @@
 use crate::data::load;
 use itertools::Itertools;
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -23,7 +23,7 @@ struct PartNum {
 }
 
 impl PartNum {
-    fn is_near_symbol(&self, symbol_locs: &HashMap<Coord, char>) -> bool {
+    fn is_near_symbol(&self, symbols: &HashSet<Coord>) -> bool {
         for coord in self.locs.iter() {
             for dr in -1..=1 {
                 for dc in -1..=1 {
@@ -31,7 +31,7 @@ impl PartNum {
                         r: coord.r + dr,
                         c: coord.c + dc,
                     };
-                    if symbol_locs.contains_key(&neighbor) {
+                    if symbols.contains(&neighbor) {
                         return true;
                     }
                 }
@@ -113,25 +113,26 @@ fn parse_input(input_data: &str) -> Result<(Vec<PartNum>, HashMap<Coord, char>),
 }
 
 pub fn puzzle_1(input_data: &str) -> Result<i32, PuzzleErr> {
-    let (part_nums, symbols) = parse_input(input_data)?;
+    let (part_nums, syms) = parse_input(input_data)?;
+    let sym_coords = HashSet::from_iter(syms.keys().cloned());
     Ok(part_nums
         .iter()
-        .filter(|p| p.is_near_symbol(&symbols))
+        .filter(|p| p.is_near_symbol(&sym_coords))
         .map(|p| p.val)
         .sum())
 }
 
 fn get_neighbors(coord: &Coord, part_nums: &[PartNum]) -> Vec<PartNum> {
-    let symbols = HashMap::from_iter([(*coord, '*')]);
+    let syms = HashSet::from_iter([*coord]);
     part_nums
         .iter()
-        .filter(|p| p.is_near_symbol(&symbols))
+        .filter(|p| p.is_near_symbol(&syms))
         .cloned()
         .collect()
 }
 
-pub fn puzzle_2(input_data: &str) -> Result<i32, PuzzleErr> {
-    let (part_nums, symbols) = parse_input(input_data)?;
+pub fn puzzle_2(input: &str) -> Result<i32, PuzzleErr> {
+    let (part_nums, symbols) = parse_input(input)?;
     Ok(symbols
         .iter()
         .filter(|(_, s)| s == &&'*')
