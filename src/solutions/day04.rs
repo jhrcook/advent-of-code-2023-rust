@@ -15,8 +15,8 @@ pub enum PuzzleErr {
 #[derive(Debug, Clone)]
 struct Card {
     id: u32,
-    winning_nums: LinkedHashSet<u32>,
-    observed_nums: LinkedHashSet<u32>,
+    win_nums: LinkedHashSet<u32>,
+    obs_nums: LinkedHashSet<u32>,
 }
 
 fn parse_nums(nums: &str) -> Result<LinkedHashSet<u32>, PuzzleErr> {
@@ -41,22 +41,22 @@ impl Card {
         }
         Ok(Card {
             id,
-            winning_nums: parse_nums(split_data[0])?,
-            observed_nums: parse_nums(split_data[1])?,
+            win_nums: parse_nums(split_data[0])?,
+            obs_nums: parse_nums(split_data[1])?,
         })
     }
 
     fn score(&self) -> u32 {
-        match self.n_matches() {
+        match self.n_hits() {
             0 => 0,
             1 => 1,
             x => 2_u32.pow(x - 1),
         }
     }
 
-    fn n_matches(&self) -> u32 {
-        self.winning_nums
-            .intersection(&self.observed_nums)
+    fn n_hits(&self) -> u32 {
+        self.win_nums
+            .intersection(&self.obs_nums)
             .collect::<Vec<_>>()
             .len() as u32
     }
@@ -77,17 +77,14 @@ pub fn puzzle_1(input: &str) -> Result<u32, PuzzleErr> {
 
 fn count_cards(cards: &HashMap<u32, Card>, count: &mut HashMap<u32, u32>) {
     for i in (1_u32..=cards.len() as u32).rev() {
-        let card = cards.get(&i).unwrap();
-        let new_card_ids: Vec<u32> = match card.n_matches() {
+        let c = cards.get(&i).unwrap();
+        let new_ids: Vec<u32> = match c.n_hits() {
             0 => Vec::new(),
-            x => Vec::from_iter((card.id + 1)..=(card.id + x)),
+            x => Vec::from_iter((c.id + 1)..=(c.id + x)),
         };
-        let num_new_cards: u32 = new_card_ids
-            .iter()
-            .map(|i| count.get(i).unwrap())
-            .sum::<u32>()
-            + new_card_ids.len() as u32;
-        count.insert(card.id, num_new_cards);
+        let n_new_cards: u32 =
+            new_ids.iter().map(|i| count.get(i).unwrap()).sum::<u32>() + new_ids.len() as u32;
+        count.insert(c.id, n_new_cards);
     }
 }
 
@@ -96,9 +93,9 @@ pub fn puzzle_2(input: &str) -> Result<u32, PuzzleErr> {
         .iter()
         .map(|c| (c.id, c.clone()))
         .collect::<HashMap<_, _>>();
-    let mut card_count: HashMap<u32, u32> = HashMap::new();
-    count_cards(&cards, &mut card_count);
-    Ok(card_count.values().sum::<u32>() + cards.len() as u32)
+    let mut counts: HashMap<u32, u32> = HashMap::new();
+    count_cards(&cards, &mut counts);
+    Ok(counts.values().sum::<u32>() + cards.len() as u32)
 }
 
 pub fn main(data_dir: &str) {
