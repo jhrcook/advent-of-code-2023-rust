@@ -1,4 +1,4 @@
-use aoc_2023::solutions::day04::puzzle_1;
+use aoc_2023::solutions::day04::{puzzle_1, puzzle_2};
 
 const EXAMPLE_INPUT: &str = "
 Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
@@ -14,7 +14,7 @@ fn example_1_puzzle_1() {
     assert_eq!(puzzle_1(self::EXAMPLE_INPUT), Ok(13));
 }
 
-// #[test]
-// fn example_1_puzzle_2() {
-//     assert_eq!(puzzle_2(self::EXAMPLE_INPUT), Ok(467835));
-// }
+#[test]
+fn example_1_puzzle_2() {
+    assert_eq!(puzzle_2(self::EXAMPLE_INPUT), Ok(30));
+}
