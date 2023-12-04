@@ -12,7 +12,7 @@
 | 1   | [src/solutions/day01.rs](src/solutions/day01.rs)         | ⭐️⭐️   |
 | 2   | [src/solutions/day02.rs](src/solutions/day02.rs)         | ⭐️⭐️   |
 | 3   | [src/solutions/day03.rs](src/solutions/day03.rs)         | ⭐️⭐️   |
-<!-- | 4   | [src/solutions/day04.rs](src/solutions/day04.rs)         | ⭐️⭐️   | -->
+| 4   | [src/solutions/day04.rs](src/solutions/day04.rs)         | ⭐️⭐️   |
 <!-- | 5   | [src/solutions/day05.rs](src/solutions/day05.rs)         | ⭐️⭐️   | -->
 <!-- | 6   | [src/solutions/day06.rs](src/solutions/day06.rs)         | ⭐️⭐️   | -->
 <!-- | 7   | [src/solutions/day07.rs](src/solutions/day07.rs)         | ⭐️⭐️   | -->
