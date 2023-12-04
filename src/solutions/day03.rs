@@ -80,10 +80,10 @@ fn extract_part_nums_from_line(line: &str, row: &i32) -> Result<Vec<PartNum>, Pu
     Ok(pns)
 }
 
-fn extract_symbols(input_data: &str) -> Result<HashMap<Coord, char>, PuzzleErr> {
+fn extract_symbols(input: &str) -> Result<HashMap<Coord, char>, PuzzleErr> {
     let mut symbols = HashMap::new();
     let digit_regex = Regex::new(r"\d").unwrap();
-    for (r, line) in input_data.trim().lines().enumerate() {
+    for (r, line) in input.trim().lines().enumerate() {
         for (c, sym) in line.trim().chars().enumerate() {
             if (sym == '.') | (digit_regex.is_match(&sym.to_string())) {
                 continue;
@@ -100,20 +100,20 @@ fn extract_symbols(input_data: &str) -> Result<HashMap<Coord, char>, PuzzleErr> 
     Ok(symbols)
 }
 
-fn parse_input(input_data: &str) -> Result<(Vec<PartNum>, HashMap<Coord, char>), PuzzleErr> {
-    let part_nums = input_data
+fn parse_input(input: &str) -> Result<(Vec<PartNum>, HashMap<Coord, char>), PuzzleErr> {
+    let part_nums = input
         .trim()
         .lines()
         .enumerate()
         .map(|(r, txt)| extract_part_nums_from_line(txt.trim(), &(r as i32)))
         .flatten_ok()
         .collect::<Result<Vec<_>, PuzzleErr>>()?;
-    let symbols = extract_symbols(input_data)?;
+    let symbols = extract_symbols(input)?;
     Ok((part_nums, symbols))
 }
 
-pub fn puzzle_1(input_data: &str) -> Result<i32, PuzzleErr> {
-    let (part_nums, syms) = parse_input(input_data)?;
+pub fn puzzle_1(input: &str) -> Result<i32, PuzzleErr> {
+    let (part_nums, syms) = parse_input(input)?;
     let sym_coords = HashSet::from_iter(syms.keys().cloned());
     Ok(part_nums
         .iter()

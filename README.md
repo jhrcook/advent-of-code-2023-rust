@@ -64,3 +64,9 @@ cargo install --path .
 aoc-2023
 aoc-2023 --day 1
 ```
+
+For estimating start-up time:
+
+```bash
+aoc-2023 --empty
+```
