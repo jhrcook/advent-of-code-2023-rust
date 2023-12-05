@@ -27,8 +27,6 @@ impl MapRange {
 
 #[derive(Debug, Clone)]
 struct Map {
-    // source_cat: String,
-    // dest_cat: String,
     ranges: Vec<MapRange>,
 }
 
@@ -41,6 +39,10 @@ fn line_to_range(line: &str) -> MapRange {
 }
 
 impl Map {
+    fn new(ranges: Vec<MapRange>) -> Self {
+        Self { ranges }
+    }
+
     fn translate(&self, source_val: &u32) -> u32 {
         for r in self.ranges.iter() {
             let range = r.source_start..(r.source_start + r.len);
@@ -59,17 +61,12 @@ struct Almanac {
 }
 
 impl Almanac {
-    fn apply_maps(&self) -> Vec<u32> {
-        self.seeds
-            .iter()
-            .map(|s| {
-                let mut res = *s;
-                for map in self.maps.iter() {
-                    res = map.translate(&res);
-                }
-                res
-            })
-            .collect()
+    fn apply_maps(&self, x: &u32) -> u32 {
+        let mut res = *x;
+        for map in self.maps.iter() {
+            res = map.translate(&res);
+        }
+        res
     }
 }
 
@@ -99,9 +96,7 @@ fn get_maps(input: &str) -> Result<Vec<Map>, PuzzleErr> {
         if line.contains("map:") {
             continue;
         } else if line.is_empty() {
-            maps.push(Map {
-                ranges: map_ranges.clone(),
-            });
+            maps.push(Map::new(map_ranges.clone()));
             map_ranges.clear();
         } else {
             map_ranges.push(line_to_range(line));
@@ -109,9 +104,7 @@ fn get_maps(input: &str) -> Result<Vec<Map>, PuzzleErr> {
     }
 
     if !map_ranges.is_empty() {
-        maps.push(Map {
-            ranges: map_ranges.clone(),
-        })
+        maps.push(Map::new(map_ranges.clone()))
     }
     Ok(maps)
 }
@@ -124,8 +117,28 @@ fn parse_input(input: &str) -> Result<Almanac, PuzzleErr> {
 
 pub fn puzzle_1(input: &str) -> Result<u32, PuzzleErr> {
     let almanac = parse_input(input)?;
-    let results = almanac.apply_maps();
-    Ok(*results.iter().min().unwrap())
+    Ok(almanac
+        .seeds
+        .iter()
+        .map(|x| almanac.apply_maps(x))
+        .min()
+        .unwrap())
+}
+
+pub fn puzzle_2(input: &str) -> Result<u32, PuzzleErr> {
+    let almanac = parse_input(input)?;
+    Ok(almanac
+        .seeds
+        .windows(2)
+        .step_by(2)
+        .map(|x| {
+            (x[0]..(x[0] + x[1]))
+                .map(|y| almanac.apply_maps(&y))
+                .min()
+                .unwrap()
+        })
+        .min()
+        .unwrap())
 }
 
 pub fn main(data_dir: &str) {
@@ -141,10 +154,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(650599855));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(6050769))
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
+    assert_eq!(answer_2, Ok(1240035))
 }

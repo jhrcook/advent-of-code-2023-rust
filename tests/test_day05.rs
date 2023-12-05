@@ -1,4 +1,4 @@
-use aoc_2023::solutions::day05::puzzle_1;
+use aoc_2023::solutions::day05::{puzzle_1, puzzle_2};
 
 const EXAMPLE_INPUT: &str = "
 seeds: 79 14 55 13
@@ -41,7 +41,7 @@ fn example_1_puzzle_1() {
     assert_eq!(puzzle_1(self::EXAMPLE_INPUT), Ok(35));
 }
 
-// #[test]
-// fn example_1_puzzle_2() {
-//     assert_eq!(puzzle_2(self::EXAMPLE_INPUT), Ok(30));
-// }
+#[test]
+fn example_1_puzzle_2() {
+    assert_eq!(puzzle_2(self::EXAMPLE_INPUT), Ok(46));
+}
