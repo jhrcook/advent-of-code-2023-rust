@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use crate::data::load;
 use thiserror::Error;
 
@@ -8,11 +10,11 @@ pub enum PuzzleErr {
     IntParseError(String),
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 struct MapRange {
     source_start: u32,
     dest_start: u32,
-    len: u32,
+    range: Range<u32>,
 }
 
 impl MapRange {
@@ -20,8 +22,12 @@ impl MapRange {
         Self {
             source_start,
             dest_start,
-            len,
+            range: source_start..(source_start + len),
         }
+    }
+
+    fn contains(&self, x: &u32) -> bool {
+        self.range.contains(x)
     }
 }
 
@@ -45,8 +51,7 @@ impl Map {
 
     fn translate(&self, source_val: &u32) -> u32 {
         for r in self.ranges.iter() {
-            let range = r.source_start..(r.source_start + r.len);
-            if range.contains(source_val) {
+            if r.contains(source_val) {
                 return source_val - r.source_start + r.dest_start;
             }
         }
