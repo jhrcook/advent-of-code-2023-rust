@@ -1,5 +1,5 @@
 use crate::data::load;
-use std::{cmp::Ordering, collections::HashMap, iter::zip};
+use std::{cmp::Ordering, collections::HashMap, hash::Hash, iter::zip};
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -10,8 +10,16 @@ pub enum PuzzleErr<'a> {
     UnknownCard,
 }
 
+trait FromStr {
+    fn from_str(s: char) -> Result<Self, PuzzleErr<'static>>
+    where
+        Self: Sized;
+}
+
+trait Card: Clone + Copy + PartialEq + Eq + PartialOrd + Ord + core::hash::Hash + FromStr {}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-enum Card {
+enum Card1 {
     N2,
     N3,
     N4,
@@ -27,7 +35,9 @@ enum Card {
     A,
 }
 
-impl Card {
+impl Card for Card1 {}
+
+impl FromStr for Card1 {
     fn from_str(s: char) -> Result<Self, PuzzleErr<'static>> {
         match s {
             '2' => Ok(Self::N2),
@@ -47,6 +57,46 @@ impl Card {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+enum Card2 {
+    J,
+    N2,
+    N3,
+    N4,
+    N5,
+    N6,
+    N7,
+    N8,
+    N9,
+    T,
+    Q,
+    K,
+    A,
+}
+
+impl FromStr for Card2 {
+    fn from_str(s: char) -> Result<Self, PuzzleErr<'static>> {
+        match Card1::from_str(s) {
+            Ok(Card1::N2) => Ok(Self::N2),
+            Ok(Card1::N3) => Ok(Self::N3),
+            Ok(Card1::N4) => Ok(Self::N4),
+            Ok(Card1::N5) => Ok(Self::N5),
+            Ok(Card1::N6) => Ok(Self::N6),
+            Ok(Card1::N7) => Ok(Self::N7),
+            Ok(Card1::N8) => Ok(Self::N8),
+            Ok(Card1::N9) => Ok(Self::N9),
+            Ok(Card1::T) => Ok(Self::T),
+            Ok(Card1::J) => Ok(Self::J),
+            Ok(Card1::Q) => Ok(Self::Q),
+            Ok(Card1::K) => Ok(Self::K),
+            Ok(Card1::A) => Ok(Self::A),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+impl Card for Card2 {}
 
 fn count<T: std::hash::Hash + std::cmp::Eq + Copy>(v: &[T]) -> HashMap<T, u32> {
     let mut map = HashMap::new();
@@ -68,38 +118,74 @@ enum HandType {
 }
 
 #[derive(Debug, Clone)]
-struct Hand {
-    cards: Vec<Card>,
+struct Hand<C: Card> {
+    cards: Vec<C>,
     bid: u32,
 }
 
-impl Hand {
-    fn new(cards: Vec<Card>, bid: u32) -> Self {
+impl<C: Card> Hand<C> {
+    fn new(cards: Vec<C>, bid: u32) -> Self {
         Self { cards, bid }
-    }
-
-    fn hand_type(&self) -> HandType {
-        let card_count = count(&self.cards);
-        match card_count.len() {
-            1 => HandType::FiveKind,
-            2 => match card_count.values().max().unwrap() {
-                3 => HandType::FullHouse,
-                4 => HandType::FourKind,
-                _ => panic!("Logic error in card_count = 2."),
-            },
-            3 => match card_count.values().max().unwrap() {
-                3 => HandType::ThreeKind,
-                2 => HandType::TwoPair,
-                _ => panic!("Logic error in card_count = 3."),
-            },
-            4 => HandType::OnePair,
-            5 => HandType::High,
-            _ => panic!("Too many cards in a hand."),
-        }
     }
 }
 
-impl Ord for Hand {
+trait GetHandType {
+    fn hand_type(&self) -> HandType;
+}
+
+fn _card_count_to_hand_type<T: core::hash::Hash>(counts: &HashMap<T, u32>) -> HandType {
+    match counts.len() {
+        1 => HandType::FiveKind,
+        2 => match counts.values().max().unwrap() {
+            3 => HandType::FullHouse,
+            4 => HandType::FourKind,
+            _ => panic!("Logic error in card_count = 2."),
+        },
+        3 => match counts.values().max().unwrap() {
+            3 => HandType::ThreeKind,
+            2 => HandType::TwoPair,
+            _ => panic!("Logic error in card_count = 3."),
+        },
+        4 => HandType::OnePair,
+        5 => HandType::High,
+        _ => panic!("Too many cards in a hand."),
+    }
+}
+
+impl GetHandType for Hand<Card1> {
+    fn hand_type(&self) -> HandType {
+        let card_count = count(&self.cards);
+        _card_count_to_hand_type(&card_count)
+    }
+}
+
+impl GetHandType for Hand<Card2> {
+    fn hand_type(&self) -> HandType {
+        let mut card_count = count(&self.cards);
+        if card_count.len() == 1 {
+            return HandType::FiveKind;
+        }
+        if let Some(num_jokers) = card_count.clone().get(&Card2::J) {
+            card_count.remove(&Card2::J);
+            let max_count = card_count.values().max().unwrap();
+            let top_cards = card_count
+                .iter()
+                .filter(|(_, v)| v == &max_count)
+                .map(|(k, _)| k)
+                .collect::<Vec<_>>();
+            let top_card = top_cards.first().unwrap();
+            card_count
+                .entry(**top_card)
+                .and_modify(|x| *x += num_jokers);
+        }
+        _card_count_to_hand_type(&card_count)
+    }
+}
+
+impl<C: Card> Ord for Hand<C>
+where
+    Hand<C>: GetHandType,
+{
     fn cmp(&self, other: &Self) -> Ordering {
         if self.cards == other.cards {
             return Ordering::Equal;
@@ -118,25 +204,31 @@ impl Ord for Hand {
     }
 }
 
-impl PartialOrd for Hand {
+impl<C: Card> PartialOrd for Hand<C>
+where
+    Hand<C>: GetHandType,
+{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl PartialEq for Hand {
+impl<C: Card> PartialEq for Hand<C> {
     fn eq(&self, other: &Self) -> bool {
         self.cards == other.cards
     }
 }
 
-impl Eq for Hand {}
+impl<C: Card> Eq for Hand<C> {}
 
-fn _line_to_hand(line: &str) -> Result<Hand, PuzzleErr> {
+fn _line_to_hand<C: Card>(line: &str) -> Result<Hand<C>, PuzzleErr>
+where
+    C: Clone + Copy + PartialEq + Eq + PartialOrd + Ord + core::hash::Hash,
+{
     let split_str = line.split_whitespace().collect::<Vec<_>>();
     let cards = split_str[0]
         .chars()
-        .map(Card::from_str)
+        .map(C::from_str)
         .collect::<Result<Vec<_>, PuzzleErr>>()?;
     let bid = split_str[1]
         .parse::<u32>()
@@ -144,18 +236,28 @@ fn _line_to_hand(line: &str) -> Result<Hand, PuzzleErr> {
     Ok(Hand::new(cards, bid))
 }
 
-fn parse_input(input: &str) -> Result<Vec<Hand>, PuzzleErr> {
+fn parse_input<C: Card>(input: &str) -> Result<Vec<Hand<C>>, PuzzleErr> {
     input.trim().lines().map(_line_to_hand).collect()
 }
 
-pub fn puzzle_1(input: &str) -> Result<u32, PuzzleErr> {
-    let mut cards = parse_input(input)?;
+fn score_hands<C: Card>(cards: &mut [Hand<C>]) -> u32
+where
+    Hand<C>: GetHandType,
+{
     cards.sort();
-    return Ok(cards
+    cards
         .iter()
         .enumerate()
         .map(|(i, h)| (i as u32 + 1) * h.bid)
-        .sum());
+        .sum()
+}
+
+pub fn puzzle_1(input: &str) -> Result<u32, PuzzleErr> {
+    Ok(score_hands(&mut parse_input::<Card1>(input)?))
+}
+
+pub fn puzzle_2(input: &str) -> Result<u32, PuzzleErr> {
+    Ok(score_hands(&mut parse_input::<Card2>(input)?))
 }
 
 pub fn main(data_dir: &str) {
@@ -171,10 +273,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(254024898));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(27363861))
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
+    assert_eq!(answer_2, Ok(254115617))
 }
