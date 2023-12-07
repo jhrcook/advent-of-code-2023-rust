@@ -8,7 +8,7 @@ pub fn run_all(data_dir: &str) {
     solutions::day04::main(data_dir);
     solutions::day05::main(data_dir);
     solutions::day06::main(data_dir);
-    // solutions::day07::main(data_dir);
+    solutions::day07::main(data_dir);
     // solutions::day08::main(data_dir);
     // solutions::day09::main(data_dir);
     // solutions::day10::main(data_dir);
@@ -37,7 +37,7 @@ pub fn run_day(data_dir: &str, day: &usize) {
         4 => solutions::day04::main(data_dir),
         5 => solutions::day05::main(data_dir),
         6 => solutions::day06::main(data_dir),
-        // 7 => solutions::day07::main(data_dir),
+        7 => solutions::day07::main(data_dir),
         // 8 => solutions::day08::main(data_dir),
         // 9 => solutions::day09::main(data_dir),
         // 10 => solutions::day10::main(data_dir),
