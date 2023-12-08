@@ -1,4 +1,4 @@
-use aoc_2023::solutions::day08::puzzle_1;
+use aoc_2023::solutions::day08::{puzzle_1, puzzle_2};
 
 const EXAMPLE_INPUT_1: &str = "
 RL
@@ -32,7 +32,21 @@ fn example_2_puzzle_1() {
     assert_eq!(puzzle_1(self::EXAMPLE_INPUT_2), Ok(6));
 }
 
-// #[test]
-// fn example_1_puzzle_2() {
-//     assert_eq!(puzzle_2(self::EXAMPLE_INPUT), Ok(5905));
-// }
+const EXAMPLE_INPUT_3: &str = "
+LR
+
+11A = (11B, XXX)
+11B = (XXX, 11Z)
+11Z = (11B, XXX)
+22A = (22B, XXX)
+22B = (22C, 22C)
+22C = (22Z, 22Z)
+22Z = (22B, 22B)
+XXX = (XXX, XXX)
+";
+
+#[test]
+fn example_1_puzzle_2() {
+    let _ = env_logger::try_init();
+    assert_eq!(puzzle_2(self::EXAMPLE_INPUT_3), Ok(6));
+}

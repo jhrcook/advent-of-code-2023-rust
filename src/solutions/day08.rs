@@ -1,8 +1,9 @@
-use std::collections::HashMap;
-
 use crate::data::load;
 use lazy_static::lazy_static;
+use num::Integer;
 use regex::Regex;
+use std::collections::hash_map::Entry;
+use std::collections::{HashMap, HashSet};
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -19,6 +20,7 @@ enum Direction {
     L,
 }
 
+#[derive(Debug, Clone)]
 struct Directions {
     values: Vec<Direction>,
     i: usize,
@@ -33,13 +35,13 @@ impl Directions {
 }
 
 impl Iterator for Directions {
-    type Item = Direction;
+    type Item = (usize, Direction);
     fn next(&mut self) -> Option<Self::Item> {
         if self.i == self.len {
             self.i = 0;
         }
         self.i += 1;
-        Some(self.values[self.i - 1])
+        Some((self.i - 1, self.values[self.i - 1]))
     }
 }
 
@@ -142,7 +144,7 @@ pub fn puzzle_1(input: &str) -> Result<u32, PuzzleErr> {
     let mut node = graph.get_node_id("AAA").unwrap();
     let zzz = graph.get_node_id("ZZZ").unwrap();
     let mut count = 0;
-    for d in directions {
+    for (_, d) in directions {
         count += 1;
         node = graph.next_step(node, &d).unwrap();
         if node == zzz {
@@ -150,6 +152,82 @@ pub fn puzzle_1(input: &str) -> Result<u32, PuzzleErr> {
         }
     }
     Ok(count)
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+struct StateMap {
+    visit_state: (u32, usize),
+    start: u32,
+    loop_size: u32,
+}
+
+fn make_state_map(
+    start: &u32,
+    end_nodes: &HashSet<&u32>,
+    graph: &Graph,
+    directions: Directions,
+) -> StateMap {
+    let mut node = start;
+    let mut count = 0;
+    let mut state_map = HashMap::new();
+    let mut visit_state: Option<(u32, usize)> = None;
+    for (i, d) in directions {
+        count += 1;
+        node = graph.next_step(node, &d).unwrap();
+        if let Entry::Vacant(e) = state_map.entry((*node, i)) {
+            if end_nodes.contains(node) {
+                e.insert(count);
+            }
+        } else {
+            visit_state = Some((*node, i));
+            break;
+        }
+    }
+    let start = *state_map.get(&visit_state.unwrap()).unwrap();
+    let loop_size = count - start;
+    StateMap {
+        visit_state: visit_state.unwrap(),
+        start,
+        loop_size,
+    }
+}
+
+// Algorithm source: https://www.geeksforgeeks.org/lcm-of-given-array-elements/
+fn lcm(a: Vec<u64>) -> u64 {
+    let mut lcm = a[0];
+    for i in a.iter() {
+        lcm = (lcm * *i).div_floor(&num::integer::gcd(lcm, *i));
+    }
+    lcm
+}
+
+pub fn puzzle_2(input: &str) -> Result<u64, PuzzleErr> {
+    let (directions, graph) = parse_input(input)?;
+
+    let start_nodes = graph
+        .id_to_name
+        .iter()
+        .filter(|(_, n)| n.ends_with('A'))
+        .map(|(i, _)| i)
+        .collect::<Vec<_>>();
+
+    let end_nodes = graph
+        .id_to_name
+        .iter()
+        .filter(|(_, n)| n.ends_with('Z'))
+        .map(|(i, _)| i)
+        .collect::<HashSet<_>>();
+
+    let state_maps = start_nodes
+        .iter()
+        .map(|n| make_state_map(n, &end_nodes, &graph, directions.clone()))
+        .collect::<Vec<_>>();
+
+    Ok(lcm(state_maps
+        .iter()
+        .map(|sm| sm.loop_size as u64)
+        .collect()))
 }
 
 pub fn main(data_dir: &str) {
@@ -165,10 +243,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(19631));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(254115617))
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
+    assert_eq!(answer_2, Ok(21003205388413))
 }
