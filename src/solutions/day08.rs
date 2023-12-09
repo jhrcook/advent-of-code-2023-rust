@@ -1,6 +1,6 @@
 use crate::data::load;
 use lazy_static::lazy_static;
-use num::Integer;
+use num::integer::div_floor;
 use regex::Regex;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
@@ -197,7 +197,7 @@ fn make_state_map(
 fn lcm(a: Vec<u64>) -> u64 {
     let mut lcm = a[0];
     for i in a.iter() {
-        lcm = (lcm * *i).div_floor(&num::integer::gcd(lcm, *i));
+        lcm = div_floor(lcm * *i, num::integer::gcd(lcm, *i));
     }
     lcm
 }
