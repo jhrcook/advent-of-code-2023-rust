@@ -1,4 +1,4 @@
-use aoc_2023::solutions::day09::puzzle_1;
+use aoc_2023::solutions::day09::{puzzle_1, puzzle_2};
 
 const EXAMPLE_INPUT_1: &str = "
 0 3 6 9 12 15
@@ -10,4 +10,10 @@ const EXAMPLE_INPUT_1: &str = "
 fn example_1_puzzle_1() {
     let _ = env_logger::try_init();
     assert_eq!(puzzle_1(self::EXAMPLE_INPUT_1), Ok(114));
+}
+
+#[test]
+fn example_1_puzzle_2() {
+    let _ = env_logger::try_init();
+    assert_eq!(puzzle_2(self::EXAMPLE_INPUT_1), Ok(2));
 }

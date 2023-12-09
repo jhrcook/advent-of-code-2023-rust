@@ -17,7 +17,7 @@
 | 6   | [src/solutions/day06.rs](src/solutions/day06.rs)         | ⭐️⭐️   |
 | 7   | [src/solutions/day07.rs](src/solutions/day07.rs)         | ⭐️⭐️   |
 | 8   | [src/solutions/day08.rs](src/solutions/day08.rs)         | ⭐️⭐️   |
-<!-- | 9   | [src/solutions/day09.rs](src/solutions/day09.rs)         | ⭐️⭐️   | -->
+| 9   | [src/solutions/day09.rs](src/solutions/day09.rs)         | ⭐️⭐️   |
 <!-- | 10  | [src/solutions/day10.rs](src/solutions/day10.rs)         | ⭐️⭐️   | -->
 <!-- | 11  | [src/solutions/day11.rs](src/solutions/day11.rs)         | ⭐️⭐️   | -->
 <!-- | 12  | [src/solutions/day12.rs](src/solutions/day12.rs)         | ⭐️⭐️   | -->

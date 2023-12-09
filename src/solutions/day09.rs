@@ -1,6 +1,5 @@
-use std::num::ParseIntError;
-
 use crate::data::load;
+use std::num::ParseIntError;
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -48,6 +47,17 @@ pub fn puzzle_1(input: &str) -> Result<i32, PuzzleErr> {
     Ok(seqs.iter().map(|s| oasis_prediction(s)).sum())
 }
 
+pub fn puzzle_2(input: &str) -> Result<i32, PuzzleErr> {
+    let seqs = parse_input(input)?
+        .iter_mut()
+        .map(|s| {
+            s.reverse();
+            s.clone()
+        })
+        .collect::<Vec<_>>();
+    Ok(seqs.iter().map(|s| oasis_prediction(s)).sum())
+}
+
 pub fn main(data_dir: &str) {
     println!("Day 9: Mirage Maintenance");
     let data = load(data_dir, 9, None);
@@ -61,10 +71,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(1666172641));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(21003205388413))
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
+    assert_eq!(answer_2, Ok(933))
 }
