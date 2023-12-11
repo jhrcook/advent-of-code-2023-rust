@@ -1,17 +1,24 @@
 use crate::data::load;
 use ndarray::prelude::*;
-use thiserror::Error;
-
-#[derive(Error, Debug, PartialEq, Eq)]
-pub enum PuzzleErr {
-    #[error("Unknown pipe character: {}.", .0)]
-    UnknownPipeChar(String),
-}
+use std::iter::zip;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Coord {
     r: usize,
     c: usize,
+}
+
+impl Coord {
+    fn t(&self) -> Self {
+        Self {
+            r: self.c,
+            c: self.r,
+        }
+    }
+
+    fn dist(&self, other: &Self) -> usize {
+        self.r.abs_diff(other.r) + self.c.abs_diff(other.c)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -20,7 +27,16 @@ struct CosmicMap {
     galaxies: Vec<Coord>,
 }
 
-fn parse_map(input: &str) -> Result<CosmicMap, PuzzleErr> {
+impl CosmicMap {
+    fn t(&self) -> Self {
+        Self {
+            arr: self.arr.t().to_owned(),
+            galaxies: self.galaxies.iter().map(|c| c.t()).collect(),
+        }
+    }
+}
+
+fn parse_map(input: &str) -> CosmicMap {
     let lines = input.trim().lines().map(|l| l.trim()).collect::<Vec<_>>();
     let width = lines.first().unwrap().len();
     let height = lines.len();
@@ -34,63 +50,57 @@ fn parse_map(input: &str) -> Result<CosmicMap, PuzzleErr> {
             }
         }
     }
-    Ok(CosmicMap { arr, galaxies })
-}
-
-fn _expand_arr_rows(arr: Array2<u8>) -> Array2<u8> {
-    let mut vecs = Vec::new();
-
-    let mut nrows = 0;
-    for r in arr.rows() {
-        nrows += 1;
-        vecs.extend_from_slice(r.to_vec().as_slice());
-        if r.sum() == 0 {
-            nrows += 1;
-            vecs.extend_from_slice(r.to_vec().as_slice());
-        }
-    }
-    Array2::from_shape_vec((nrows, arr.ncols()), vecs).unwrap()
-}
-
-fn _locate_galaxies(arr: &Array2<u8>) -> Vec<Coord> {
-    let mut galaxies = Vec::new();
-    for i in 0..arr.nrows() {
-        for j in 0..arr.ncols() {
-            if arr.get((i, j)).unwrap() == &1 {
-                galaxies.push(Coord { r: i, c: j })
-            }
-        }
-    }
-    galaxies
-}
-
-fn expand_map(map: CosmicMap) -> CosmicMap {
-    let arr = _expand_arr_rows(map.arr);
-    let arr = _expand_arr_rows(arr.t().to_owned()).t().to_owned();
-    let galaxies = _locate_galaxies(&arr);
     CosmicMap { arr, galaxies }
 }
 
-fn calculate_dists(map: &CosmicMap) -> Vec<usize> {
+fn calculate_dists(coords: &[Coord]) -> Vec<usize> {
     let mut dists = Vec::new();
-    for (i, a) in map.galaxies.iter().enumerate() {
-        for b in map.galaxies[(i + 1)..].iter() {
-            dists.push(a.r.abs_diff(b.r) + a.c.abs_diff(b.c))
+    for (i, a) in coords.iter().enumerate() {
+        for b in coords[(i + 1)..].iter() {
+            dists.push(a.dist(b))
         }
     }
     dists
 }
 
-pub fn puzzle_1(input: &str) -> Result<usize, PuzzleErr> {
-    let map = parse_map(input)?;
-    log::info!("STARTING MAP:\n{:?}", map.arr);
-    log::info!("Galaxy locations: {:?}", map.galaxies);
+fn expand_galaxies(map: &CosmicMap, ex_rate: usize) -> Vec<Coord> {
+    let x = match ex_rate {
+        0..=1 => ex_rate,
+        _ => ex_rate - 1,
+    };
+    let coords = map.galaxies.clone();
+    let mut add_rs = (0..coords.len()).map(|_| 0).collect::<Vec<_>>();
 
-    let map = expand_map(map);
-    log::info!("EXPANDED MAP:\n{:?}", map.arr);
-    log::info!("Galaxy locations: {:?}", map.galaxies);
+    for i in 0..map.arr.nrows() {
+        if map.arr.row(i).sum() == 0 {
+            add_rs = zip(&coords, add_rs)
+                .map(|(coord, add_r)| if coord.r > i { add_r + x } else { add_r })
+                .collect();
+        }
+    }
 
-    Ok(calculate_dists(&map).iter().sum())
+    zip(coords, add_rs)
+        .map(|(coord, add_r)| Coord {
+            r: coord.r + add_r,
+            c: coord.c,
+        })
+        .collect()
+}
+
+fn _solve(input: &str, expansion_size: usize) -> usize {
+    let mut map = parse_map(input);
+    map.galaxies = expand_galaxies(&map, expansion_size);
+    map = map.t();
+    map.galaxies = expand_galaxies(&map, expansion_size);
+    calculate_dists(&map.galaxies).iter().sum()
+}
+
+pub fn puzzle_1(input: &str) -> usize {
+    _solve(input, 1)
+}
+
+pub fn puzzle_2(input: &str, expansion_size: usize) -> usize {
+    _solve(input, expansion_size)
 }
 
 pub fn main(data_dir: &str) {
@@ -99,17 +109,11 @@ pub fn main(data_dir: &str) {
 
     // Puzzle 1.
     let answer_1 = puzzle_1(&data);
-    match answer_1 {
-        Ok(x) => println!(" Puzzle 1: {}", x),
-        Err(e) => panic!("No solution to puzzle 1: {}.", e),
-    }
-    assert_eq!(answer_1, Ok(9724940));
+    println!(" Puzzle 1: {}", answer_1);
+    assert_eq!(answer_1, 9724940);
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(933))
+    let answer_2 = puzzle_2(&data, 1000000);
+    println!(" Puzzle 1: {}", answer_2);
+    assert_eq!(answer_2, 569052586852);
 }
