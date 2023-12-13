@@ -1,6 +1,6 @@
 use crate::data::load;
 use itertools::Itertools;
-use std::{fmt::Display, num::ParseIntError};
+use std::{fmt::Display, iter::zip, num::ParseIntError};
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -85,15 +85,21 @@ impl Display for Row {
     }
 }
 
+fn _split_condition_vec(conditions: &[Condition]) -> Vec<&[Condition]> {
+    conditions
+        .split(|x| x == &Condition::Operational)
+        .filter(|cs| !cs.is_empty())
+        .collect::<Vec<_>>()
+}
+
 impl Row {
     fn _final_validation(&self, prop_conds: &[Condition]) -> bool {
-        let s = display_vec(prop_conds);
-        let splits = s.split('.').filter(|s| !s.is_empty()).collect::<Vec<_>>();
+        let splits = _split_condition_vec(prop_conds);
         if self.groups.len() != splits.len() {
             return false;
         }
-        for (i, seq) in splits.iter().enumerate() {
-            if seq.len() != self.groups[i] {
+        for (seq, gr) in zip(splits.iter(), self.groups.iter()) {
+            if seq.len() != *gr {
                 return false;
             }
         }
@@ -101,8 +107,7 @@ impl Row {
     }
 
     fn _in_progress_validation(&self, prop_conds: &[Condition]) -> bool {
-        let s = display_vec(prop_conds);
-        let splits = s.split('.').filter(|s| !s.is_empty()).collect::<Vec<_>>();
+        let splits = _split_condition_vec(prop_conds);
         if self.groups.len() < splits.len() {
             return false;
         }
@@ -152,9 +157,6 @@ impl Row {
             }
             prop_conds = self.prune(&prop_conds);
         }
-        for cond in prop_conds.iter() {
-            log::debug!("  {}", display_vec(cond));
-        }
         prop_conds.len()
     }
 }
@@ -172,6 +174,33 @@ pub fn puzzle_1(input: &str) -> Result<usize, PuzzleErr> {
     Ok(rows.into_iter().map(|r| r.num_solutions()).sum())
 }
 
+pub fn puzzle_2(input: &str) -> Result<usize, PuzzleErr> {
+    let rows = parse_input(input)?
+        .iter()
+        .map(|r| {
+            let mut c = (0..5)
+                .map(|_| {
+                    let mut new_c = r.conditions.clone();
+                    new_c.push(Condition::Unknown);
+                    new_c
+                })
+                .concat();
+            let _ = c.pop();
+            let g = (0..5).map(|_| r.groups.clone()).concat();
+            Row {
+                conditions: c,
+                groups: g,
+            }
+        })
+        .collect::<Vec<Row>>();
+
+    Ok(rows.into_iter().map(|r| r.num_solutions()).sum())
+    // for row in rows.iter() {
+    //     log::debug!("{}", row);
+    // }
+    // Ok(0)
+}
+
 pub fn main(data_dir: &str) {
     println!("Day 12: Hot Springs");
     let data = load(data_dir, 12, None);
@@ -185,10 +214,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(7716));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
     // assert_eq!(answer_2, Ok(933))
 }
