@@ -1,5 +1,7 @@
 use crate::data::load;
-use std::{collections::HashSet, fmt::Display};
+use cached::proc_macro::cached;
+use std::collections::{HashMap, HashSet};
+use std::hash::{Hash, Hasher};
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -8,7 +10,7 @@ pub enum PuzzleErr {
     ParseInputError,
 }
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 struct Coord {
     r: isize,
     c: isize,
@@ -20,13 +22,16 @@ impl Coord {
     }
 }
 
-impl Display for Coord {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({}, {})", self.r, self.c)
+impl Coord {
+    fn rot90(&self, r_max: &isize) -> Coord {
+        Coord {
+            r: self.c,
+            c: r_max - self.r,
+        }
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct Rocks {
     round: HashSet<Coord>,
     square: HashSet<Coord>,
@@ -34,27 +39,14 @@ struct Rocks {
     width: isize,
 }
 
-impl Display for Rocks {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = (0..self.height)
-            .map(|r| {
-                (0..self.width)
-                    .map(|c| {
-                        let coord = Coord::new(r, c);
-                        if self.round.contains(&coord) {
-                            "O"
-                        } else if self.square.contains(&coord) {
-                            return "#";
-                        } else {
-                            return ".";
-                        }
-                    })
-                    .collect::<Vec<_>>()
-                    .join("")
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-        write!(f, "{}", s)
+impl Hash for Rocks {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let mut v_round = self.round.iter().collect::<Vec<_>>();
+        v_round.sort();
+        v_round.hash(state);
+        let mut v_square = self.square.iter().collect::<Vec<_>>();
+        v_square.sort();
+        v_square.hash(state);
     }
 }
 
@@ -91,16 +83,21 @@ fn find_north_position(coord: &Coord, rocks: &Rocks) -> Coord {
     prev_coord
 }
 
-fn tilt_north(rocks: &mut Rocks) {
+#[cached]
+fn tilt_north(rocks: Rocks) -> Rocks {
+    let mut new_rocks = rocks.clone();
     for r in 0..rocks.height {
         for c in 0..rocks.width {
             let coord = Coord::new(r, c);
-            if rocks.round.contains(&coord) {
-                rocks.round.remove(&coord);
-                rocks.round.insert(find_north_position(&coord, rocks));
+            if new_rocks.round.contains(&coord) {
+                new_rocks.round.remove(&coord);
+                new_rocks
+                    .round
+                    .insert(find_north_position(&coord, &new_rocks));
             }
         }
     }
+    new_rocks
 }
 
 fn calc_total_load(rocks: &Rocks) -> isize {
@@ -109,7 +106,57 @@ fn calc_total_load(rocks: &Rocks) -> isize {
 
 pub fn puzzle_1(input: &str) -> isize {
     let mut rocks = parse_input(input);
-    tilt_north(&mut rocks);
+    rocks = tilt_north(rocks);
+    calc_total_load(&rocks)
+}
+
+#[cached]
+fn rotate_rocks(rocks: Rocks) -> Rocks {
+    let mut new_rocks = rocks.clone();
+    new_rocks.round = new_rocks
+        .round
+        .iter()
+        .map(|c| c.rot90(&(new_rocks.height - 1)))
+        .collect();
+    new_rocks.square = new_rocks
+        .square
+        .iter()
+        .map(|c| c.rot90(&(new_rocks.height - 1)))
+        .collect();
+    (new_rocks.height, new_rocks.width) = (new_rocks.width, new_rocks.height);
+    new_rocks
+}
+
+#[cached]
+fn rotation_cycle(mut rocks: Rocks) -> Rocks {
+    for _ in 0..4 {
+        rocks = rotate_rocks(tilt_north(rocks));
+    }
+    rocks
+}
+
+pub fn puzzle_2(input: &str, n_cycles: usize) -> isize {
+    let mut rocks = parse_input(input);
+
+    let mut prev_cycle_cache: HashMap<Rocks, Vec<usize>> = HashMap::new();
+    let mut i = 0;
+    while i != n_cycles {
+        rocks = rotation_cycle(rocks.clone());
+        i += 1;
+
+        let prev_i = prev_cycle_cache.entry(rocks.clone()).or_default();
+
+        if let Some(new_i) = prev_i
+            .iter()
+            .map(|j| i + (i - j))
+            .filter(|new_i| new_i <= &n_cycles)
+            .max()
+        {
+            i = new_i;
+        }
+        prev_i.push(i);
+    }
+
     calc_total_load(&rocks)
 }
 
@@ -123,10 +170,8 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, 112046);
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(30449))
+    let answer_2 = puzzle_2(&data, 1000000000);
+    println!(" Puzzle 2: {}", answer_2);
+    assert_eq!(answer_2, 104619);
 }
+// 104639 (too high)
