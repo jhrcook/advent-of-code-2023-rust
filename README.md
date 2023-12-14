@@ -20,7 +20,7 @@
 | 9   | [src/solutions/day09.rs](src/solutions/day09.rs)         | ⭐️⭐️   |
 | 10  | [src/solutions/day10.rs](src/solutions/day10.rs)         | ⭐️    |
 | 11  | [src/solutions/day11.rs](src/solutions/day11.rs)         | ⭐️⭐️   |
-| 12  | [src/solutions/day12.rs](src/solutions/day12.rs)         | ⭐️   |
+| 12  | [src/solutions/day12.rs](src/solutions/day12.rs)         | ⭐️⭐️   |
 | 13  | [src/solutions/day13.rs](src/solutions/day13.rs)         | ⭐️⭐️   |
 <!-- | 14  | [src/solutions/day14.rs](src/solutions/day14.rs)         | ⭐️⭐️   | -->
 <!-- | 15  | [src/solutions/day15.rs](src/solutions/day15.rs)         | ⭐️⭐️   | -->
@@ -33,6 +33,8 @@
 <!-- | 22  | [src/solutions/day22.rs](src/solutions/day22.rs)         | ⭐️⭐️   | -->
 <!-- | 23  | [src/solutions/day23.rs](src/solutions/day23.rs)         | ⭐️⭐️   | -->
 <!-- | 24  | [src/solutions/day24.rs](src/solutions/day24.rs)         | ⭐️⭐️   | -->
+
+Used this Reddit post for Day 12 part 2: <https://www.reddit.com/r/adventofcode/comments/18hbbxe/2023_day_12python_stepbystep_tutorial_with_bonus/>
 
 ## Setup
 

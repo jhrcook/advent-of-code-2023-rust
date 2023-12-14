@@ -1,6 +1,7 @@
 use crate::data::load;
+use cached::proc_macro::cached;
 use itertools::Itertools;
-use std::{fmt::Display, iter::zip, num::ParseIntError};
+use std::{fmt::Display, num::ParseIntError};
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -39,13 +40,6 @@ impl Display for Condition {
         }
     }
 }
-
-// fn display_vec<T>(conditions: &[T]) -> String
-// where
-//     T: Display,
-// {
-//     conditions.iter().map(|c| format!("{}", c)).join("")
-// }
 
 #[derive(Debug, Clone)]
 struct Row {
@@ -92,75 +86,6 @@ fn _split_condition_vec(conditions: &[Condition]) -> Vec<&[Condition]> {
         .collect::<Vec<_>>()
 }
 
-impl Row {
-    fn _final_validation(&self, prop_conds: &[Condition]) -> bool {
-        let splits = _split_condition_vec(prop_conds);
-        if self.groups.len() != splits.len() {
-            return false;
-        }
-        for (seq, gr) in zip(splits.iter(), self.groups.iter()) {
-            if seq.len() != *gr {
-                return false;
-            }
-        }
-        true
-    }
-
-    fn _in_progress_validation(&self, prop_conds: &[Condition]) -> bool {
-        let splits = _split_condition_vec(prop_conds);
-        if self.groups.len() < splits.len() {
-            return false;
-        }
-        for (i, seq) in splits.iter().enumerate() {
-            if seq.len() > self.groups[i] {
-                return false;
-            }
-        }
-        true
-    }
-
-    fn validate(&self, prop_conds: &Vec<Condition>) -> bool {
-        if prop_conds.len() == self.conditions.len() {
-            self._final_validation(prop_conds)
-        } else {
-            self._in_progress_validation(prop_conds)
-        }
-    }
-
-    fn prune(&self, prop_conditions: &[Vec<Condition>]) -> Vec<Vec<Condition>> {
-        prop_conditions
-            .iter()
-            .filter(|cond| self.validate(cond))
-            .cloned()
-            .collect::<Vec<_>>()
-    }
-
-    fn num_solutions(&self) -> usize {
-        let mut prop_conds: Vec<Vec<Condition>> = Vec::new();
-        prop_conds.push(Vec::new());
-        for cond in self.conditions.iter() {
-            match cond {
-                Condition::Unknown => {
-                    let _prec_prop_conds = prop_conds.clone();
-                    prop_conds.clear();
-                    for new_cond in [&Condition::Damaged, &Condition::Operational] {
-                        for _cond in _prec_prop_conds.iter() {
-                            let mut _new_prop_cond = _cond.clone();
-                            _new_prop_cond.push(*new_cond);
-                            prop_conds.push(_new_prop_cond);
-                        }
-                    }
-                }
-                _ => {
-                    prop_conds.iter_mut().for_each(|c| c.push(*cond));
-                }
-            }
-            prop_conds = self.prune(&prop_conds);
-        }
-        prop_conds.len()
-    }
-}
-
 fn parse_input(input: &str) -> Result<Vec<Row>, PuzzleErr> {
     input
         .trim()
@@ -169,16 +94,77 @@ fn parse_input(input: &str) -> Result<Vec<Row>, PuzzleErr> {
         .collect::<Result<Vec<_>, PuzzleErr>>()
 }
 
-pub fn puzzle_1(input: &str) -> Result<usize, PuzzleErr> {
-    let rows = parse_input(input)?;
-    Ok(rows.into_iter().map(|r| r.num_solutions()).sum())
+fn add_operational(record: Vec<Condition>, groups: Vec<usize>) -> usize {
+    count_solutions(record[1..].to_vec(), groups)
 }
 
-pub fn puzzle_2(input: &str) -> Result<usize, PuzzleErr> {
-    let rows = parse_input(input)?
+fn add_damaged(record: Vec<Condition>, groups: Vec<usize>, next_group: usize) -> usize {
+    // This current group must be all "#" or "?" (no "." allowed).
+    if record.len() < next_group {
+        return 0;
+    }
+    if record[..next_group]
+        .iter()
+        .any(|c| c == &Condition::Operational)
+    {
+        return 0;
+    }
+
+    // If the remaining record is the length of the group, then successful if there are
+    // no more remaining groups.
+    if record.len() == next_group {
+        if groups.len() == 1 {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    // The next character after the group cannot be "#".
+    match record[next_group] {
+        Condition::Damaged => 0,
+        _ => count_solutions(record[(next_group + 1)..].to_vec(), groups[1..].to_vec()),
+    }
+}
+
+#[cached]
+fn count_solutions(record: Vec<Condition>, groups: Vec<usize>) -> usize {
+    // If there are no more groups and no more "#", then successful.
+    let Some(next_group) = groups.first() else {
+        if record.iter().any(|c| c == &Condition::Damaged) {
+            return 0;
+        } else {
+            return 1;
+        }
+    };
+
+    // If there are no more items left in record, then unsuccessful.
+    let Some(next_cond) = record.first() else {
+        return 0;
+    };
+
+    match next_cond {
+        Condition::Damaged => add_damaged(record.clone(), groups.clone(), *next_group),
+        Condition::Operational => add_operational(record.clone(), groups.clone()),
+        Condition::Unknown => {
+            add_damaged(record.clone(), groups.clone(), *next_group)
+                + add_operational(record.clone(), groups.clone())
+        }
+    }
+}
+
+pub fn puzzle_1(input: &str) -> Result<usize, PuzzleErr> {
+    Ok(parse_input(input)?
+        .iter()
+        .map(|r| count_solutions(r.conditions.clone(), r.groups.clone()))
+        .sum())
+}
+
+fn parse_and_expand_input(input: &str, n_reps: usize) -> Result<Vec<Row>, PuzzleErr> {
+    Ok(parse_input(input)?
         .iter()
         .map(|r| {
-            let mut c = (0..5)
+            let mut c = (0..n_reps)
                 .map(|_| {
                     let mut new_c = r.conditions.clone();
                     new_c.push(Condition::Unknown);
@@ -186,18 +172,20 @@ pub fn puzzle_2(input: &str) -> Result<usize, PuzzleErr> {
                 })
                 .concat();
             let _ = c.pop();
-            let g = (0..5).map(|_| r.groups.clone()).concat();
+            let g = (0..n_reps).map(|_| r.groups.clone()).concat();
             Row {
                 conditions: c,
                 groups: g,
             }
         })
-        .collect::<Vec<Row>>();
+        .collect::<Vec<Row>>())
+}
 
-    Ok(rows.into_iter().map(|r| r.num_solutions()).sum())
-    // for row in rows.iter() {
-    //     log::debug!("{}", row);
-    // }
+pub fn puzzle_2(input: &str) -> Result<usize, PuzzleErr> {
+    Ok(parse_and_expand_input(input, 5)?
+        .iter()
+        .map(|r| count_solutions(r.conditions.clone(), r.groups.clone()))
+        .sum())
     // Ok(0)
 }
 
@@ -214,10 +202,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(7716));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(933))
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
+    assert_eq!(answer_2, Ok(18716325559999))
 }
