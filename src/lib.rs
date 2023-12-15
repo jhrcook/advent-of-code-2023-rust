@@ -17,7 +17,7 @@ pub fn run_day(data_dir: &str, day: &usize) {
         12 => solutions::day12::main(data_dir),
         13 => solutions::day13::main(data_dir),
         14 => solutions::day14::main(data_dir),
-        // 15 => solutions::day15::main(data_dir),
+        15 => solutions::day15::main(data_dir),
         // 16 => solutions::day16::main(data_dir),
         // 17 => solutions::day17::main(data_dir),
         // 18 => solutions::day18::main(data_dir),
