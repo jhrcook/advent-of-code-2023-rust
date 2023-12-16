@@ -23,8 +23,8 @@
 | 12  | [src/solutions/day12.rs](src/solutions/day12.rs)         | ⭐️⭐️   |
 | 13  | [src/solutions/day13.rs](src/solutions/day13.rs)         | ⭐️⭐️   |
 | 14  | [src/solutions/day14.rs](src/solutions/day14.rs)         | ⭐️⭐️   |
-<!-- | 15  | [src/solutions/day15.rs](src/solutions/day15.rs)         | ⭐️⭐️   | -->
-<!-- | 16  | [src/solutions/day16.rs](src/solutions/day16.rs)         | ⭐️⭐️   | -->
+| 15  | [src/solutions/day15.rs](src/solutions/day15.rs)         | ⭐️⭐️   |
+| 16  | [src/solutions/day16.rs](src/solutions/day16.rs)         | ⭐️⭐️   |
 <!-- | 17  | [src/solutions/day17.rs](src/solutions/day17.rs)         | ⭐️⭐️   | -->
 <!-- | 18  | [src/solutions/day18.rs](src/solutions/day18.rs)         | ⭐️⭐️   | -->
 <!-- | 19  | [src/solutions/day19.rs](src/solutions/day19.rs)         | ⭐️⭐️   | -->

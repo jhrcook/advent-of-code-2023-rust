@@ -1,5 +1,8 @@
 use crate::data::load;
-use std::collections::{HashMap, HashSet};
+use std::{
+    cmp,
+    collections::{HashMap, HashSet},
+};
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq, Eq)]
@@ -70,25 +73,30 @@ impl Beam {
     fn new(loc: Coord, dir: Direction) -> Self {
         Beam { loc, dir }
     }
+}
 
+impl Beam {
     fn move_up(&self) -> Self {
         let mut b = *self;
         b.dir = Direction::Up;
         b.loc.r -= 1;
         b
     }
+
     fn move_down(&self) -> Self {
         let mut b = *self;
         b.dir = Direction::Down;
         b.loc.r += 1;
         b
     }
+
     fn move_left(&self) -> Self {
         let mut b = *self;
         b.dir = Direction::Left;
         b.loc.c -= 1;
         b
     }
+
     fn move_right(&self) -> Self {
         let mut b = *self;
         b.dir = Direction::Right;
@@ -143,16 +151,43 @@ fn move_beam(beam: &Beam, grid: &HashMap<Coord, CaveObject>, beam_tracker: &mut 
     }
 }
 
-pub fn puzzle_1(input: &str) -> Result<usize, PuzzleErr> {
-    let grid = parse_input(input)?;
+fn count_energized_tiles(starting_beam: Beam, grid: &HashMap<Coord, CaveObject>) -> usize {
     let mut energized_coords = HashSet::new();
-    let beam = Beam::new(Coord { r: 0, c: 0 }, Direction::Right);
-    move_beam(&beam, &grid, &mut energized_coords);
-    Ok(energized_coords
+    move_beam(&starting_beam, grid, &mut energized_coords);
+    energized_coords
         .iter()
         .map(|b| b.loc)
         .collect::<HashSet<_>>()
-        .len())
+        .len()
+}
+
+pub fn puzzle_1(input: &str) -> Result<usize, PuzzleErr> {
+    let grid = parse_input(input)?;
+    let beam = Beam::new(Coord { r: 0, c: 0 }, Direction::Right);
+    Ok(count_energized_tiles(beam, &grid))
+}
+
+pub fn puzzle_2(input: &str) -> Result<usize, PuzzleErr> {
+    let grid = parse_input(input)?;
+    let mut max = 0;
+    let height = grid.keys().map(|c| c.r).max().unwrap();
+    let width = grid.keys().map(|c| c.c).max().unwrap();
+
+    for r in 0..=height {
+        for (c, dir) in [(0, Direction::Right), (width, Direction::Left)] {
+            let beam = Beam::new(Coord { r, c }, dir);
+            max = cmp::max(max, count_energized_tiles(beam, &grid));
+        }
+    }
+
+    for c in 0..=width {
+        for (r, dir) in [(0, Direction::Down), (height, Direction::Up)] {
+            let beam = Beam::new(Coord { r, c }, dir);
+            max = cmp::max(max, count_energized_tiles(beam, &grid));
+        }
+    }
+
+    Ok(max)
 }
 
 pub fn main(data_dir: &str) {
@@ -168,10 +203,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(6921));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(30449))
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
+    assert_eq!(answer_2, Ok(7594))
 }
