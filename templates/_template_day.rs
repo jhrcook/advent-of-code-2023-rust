@@ -12,7 +12,7 @@ pub fn puzzle_1(input: &str) -> Result<usize, PuzzleErr> {
 }
 
 pub fn main(data_dir: &str) {
-    println!("Day 00: PUZZLE_TITLE");
+    println!("Day 00: TITLE");
     let data = load(data_dir, 00, None);
 
     // Puzzle 1.
