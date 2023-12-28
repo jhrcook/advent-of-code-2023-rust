@@ -25,7 +25,7 @@
 | 14  | [src/solutions/day14.rs](src/solutions/day14.rs)         | ⭐️⭐️   |
 | 15  | [src/solutions/day15.rs](src/solutions/day15.rs)         | ⭐️⭐️   |
 | 16  | [src/solutions/day16.rs](src/solutions/day16.rs)         | ⭐️⭐️   |
-<!-- | 17  | [src/solutions/day17.rs](src/solutions/day17.rs)         | ⭐️⭐️   | -->
+| 17  | [src/solutions/day17.rs](src/solutions/day17.rs)         | ⭐️⭐️   |
 <!-- | 18  | [src/solutions/day18.rs](src/solutions/day18.rs)         | ⭐️⭐️   | -->
 <!-- | 19  | [src/solutions/day19.rs](src/solutions/day19.rs)         | ⭐️⭐️   | -->
 <!-- | 20  | [src/solutions/day20.rs](src/solutions/day20.rs)         | ⭐️⭐️   | -->
@@ -34,7 +34,11 @@
 <!-- | 23  | [src/solutions/day23.rs](src/solutions/day23.rs)         | ⭐️⭐️   | -->
 <!-- | 24  | [src/solutions/day24.rs](src/solutions/day24.rs)         | ⭐️⭐️   | -->
 
+## Help
+
 Used this Reddit post for Day 12 part 2: <https://www.reddit.com/r/adventofcode/comments/18hbbxe/2023_day_12python_stepbystep_tutorial_with_bonus/>
+
+I implemented the algorithm described in this Reddit [post](https://www.reddit.com/r/adventofcode/comments/18k9ne5/comment/kdqp7jx/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) for Day 17 ([Python code](https://topaz.github.io/paste/#XQAAAQCcAgAAAAAAAAAzHIoib6py7i/yVWhl9dSCjkM4GPHrtd8B89i40hrslkM0i9r9hxir+33uzZa01Y7HY/oCJMAoqvX6OLOsC224RKbiSlSU1U6sDn8KTPKvoKhtJCgPq4QDeXZl8oKQCyrAOP0g3rHGLO7gde4rqBUfOeNyypDl5CSgMF0ceJifzUGjB1OliVqXbO/Ydsmg77dYyTbWx89UvPTsZiijfyTYH7ybEz1UtsTx6VHFZ5zcAVDl7ClaQ7+4gn7tShBjy8XQ0s9XR6uWqgo3vPVBjj9Bf3UGCWSP8qYw9N4dZcLcnLbZQgRkBbK2s9a0Cl0XXD0ie4lmMxzz3pLE3i7GFFzUEv9/dNRee0hFwDsxRBK7ERsb8Xt+mYS+fyiltY71gJKfELcn9Eu3TJy2kI/k2o4YHLSGL20gXFLoE4CunCJ2f6iLMbyU/+WeeKUMZn4BQ72S3uZ4SAD9wV+H44NtZEq0I6qYBCrLX98ODOc6lTFAPjJWFmvpIv74Evkb))
 
 ## Setup
 
