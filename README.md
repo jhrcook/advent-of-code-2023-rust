@@ -26,7 +26,7 @@
 | 15  | [src/solutions/day15.rs](src/solutions/day15.rs)         | ⭐️⭐️   |
 | 16  | [src/solutions/day16.rs](src/solutions/day16.rs)         | ⭐️⭐️   |
 | 17  | [src/solutions/day17.rs](src/solutions/day17.rs)         | ⭐️⭐️   |
-<!-- | 18  | [src/solutions/day18.rs](src/solutions/day18.rs)         | ⭐️⭐️   | -->
+| 18  | [src/solutions/day18.rs](src/solutions/day18.rs)         | ⭐️⭐️   |
 <!-- | 19  | [src/solutions/day19.rs](src/solutions/day19.rs)         | ⭐️⭐️   | -->
 <!-- | 20  | [src/solutions/day20.rs](src/solutions/day20.rs)         | ⭐️⭐️   | -->
 <!-- | 21  | [src/solutions/day21.rs](src/solutions/day21.rs)         | ⭐️⭐️   | -->
