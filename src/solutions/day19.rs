@@ -259,6 +259,15 @@ pub fn puzzle_1(input: &str) -> Result<u32, PuzzleErr> {
     Ok(organize_parts(&parts, &workflows_map))
 }
 
+pub fn puzzle_2(input: &str) -> Result<u32, PuzzleErr> {
+    let (workflows, parts) = parse_input(input)?;
+    let workflows_map = workflows
+        .iter()
+        .map(|w| (w.name.as_str(), w.clone()))
+        .collect::<HashMap<&str, Workflow>>();
+    Ok(organize_parts(&parts, &workflows_map))
+}
+
 pub fn main(data_dir: &str) {
     println!("Day 19: Aplenty");
     let data = load(data_dir, 19, None);
@@ -269,13 +278,13 @@ pub fn main(data_dir: &str) {
         Ok(x) => println!(" Puzzle 1: {}", x),
         Err(e) => panic!("No solution to puzzle 1: {}.", e),
     }
-    // assert_eq!(answer_1, Ok(37113));
+    assert_eq!(answer_1, Ok(509597));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
     // assert_eq!(answer_2, Ok(30449))
 }
