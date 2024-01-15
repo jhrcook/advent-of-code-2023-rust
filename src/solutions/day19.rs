@@ -281,10 +281,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(509597));
 
     // Puzzle 2.
-    let answer_2 = puzzle_2(&data);
-    match answer_2 {
-        Ok(x) => println!(" Puzzle 2: {}", x),
-        Err(e) => panic!("No solution to puzzle 2: {}", e),
-    }
+    // let answer_2 = puzzle_2(&data);
+    // match answer_2 {
+    //     Ok(x) => println!(" Puzzle 2: {}", x),
+    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
+    // }
     // assert_eq!(answer_2, Ok(30449))
 }

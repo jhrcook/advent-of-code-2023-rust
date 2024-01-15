@@ -18,7 +18,7 @@
 | 7   | [src/solutions/day07.rs](src/solutions/day07.rs)         | ⭐️⭐️   |
 | 8   | [src/solutions/day08.rs](src/solutions/day08.rs)         | ⭐️⭐️   |
 | 9   | [src/solutions/day09.rs](src/solutions/day09.rs)         | ⭐️⭐️   |
-| 10  | [src/solutions/day10.rs](src/solutions/day10.rs)         | ⭐️    |
+| 10  | [src/solutions/day10.rs](src/solutions/day10.rs)         | ⭐️[^1] |
 | 11  | [src/solutions/day11.rs](src/solutions/day11.rs)         | ⭐️⭐️   |
 | 12  | [src/solutions/day12.rs](src/solutions/day12.rs)         | ⭐️⭐️   |
 | 13  | [src/solutions/day13.rs](src/solutions/day13.rs)         | ⭐️⭐️   |
@@ -27,12 +27,14 @@
 | 16  | [src/solutions/day16.rs](src/solutions/day16.rs)         | ⭐️⭐️   |
 | 17  | [src/solutions/day17.rs](src/solutions/day17.rs)         | ⭐️⭐️   |
 | 18  | [src/solutions/day18.rs](src/solutions/day18.rs)         | ⭐️⭐️   |
-<!-- | 19  | [src/solutions/day19.rs](src/solutions/day19.rs)         | ⭐️⭐️   | -->
-<!-- | 20  | [src/solutions/day20.rs](src/solutions/day20.rs)         | ⭐️⭐️   | -->
+| 19  | [src/solutions/day19.rs](src/solutions/day19.rs)         | ⭐️   |
+| 20  | [src/solutions/day20.rs](src/solutions/day20.rs)         | ⭐️   |
 <!-- | 21  | [src/solutions/day21.rs](src/solutions/day21.rs)         | ⭐️⭐️   | -->
 <!-- | 22  | [src/solutions/day22.rs](src/solutions/day22.rs)         | ⭐️⭐️   | -->
 <!-- | 23  | [src/solutions/day23.rs](src/solutions/day23.rs)         | ⭐️⭐️   | -->
 <!-- | 24  | [src/solutions/day24.rs](src/solutions/day24.rs)         | ⭐️⭐️   | -->
+
+[^1]: I'm close on puzzle 10 day 2. I have the algorithm ready to search the maze, but there is a bug in the construction of the maze where the primary path is not the only one selected.
 
 ## Help
 

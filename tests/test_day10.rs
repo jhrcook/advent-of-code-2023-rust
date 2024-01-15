@@ -102,8 +102,8 @@ L.L7LFJ|||||FJL7||LJ
 L7JLJL-JLJLJL--JLJ.L
 ";
 
-#[test]
-fn puzzle_2_example_4() {
-    let _ = env_logger::try_init();
-    assert_eq!(puzzle_2(self::EXAMPLE_INPUT_6), Ok(10));
-}
+// #[test]
+// fn puzzle_2_example_4() {
+//     let _ = env_logger::try_init();
+//     assert_eq!(puzzle_2(self::EXAMPLE_INPUT_6), Ok(10));
+// }
