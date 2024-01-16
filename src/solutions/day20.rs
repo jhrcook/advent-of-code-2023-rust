@@ -1,4 +1,5 @@
 use crate::data::load;
+use crate::math_utils;
 use std::collections::{HashMap, HashSet, VecDeque};
 use thiserror::Error;
 
@@ -8,6 +9,8 @@ pub enum PuzzleErr {
     ParseInputError,
     #[error("Runtime error")]
     RuntimeError,
+    #[error("An expectation required for Part 2 was violated")]
+    Part2ExpectationViolated,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -285,12 +288,13 @@ impl PulseCounter {
 }
 
 pub fn puzzle_1(input: &str, n_button_presses: u32) -> Result<u32, PuzzleErr> {
+    // Parse modules from input.
     let mut modules = parse_input(input)?;
-    modules
-        .iter()
-        .for_each(|(name, module)| log::info!("{} -> {:?}", name, module));
 
+    // Tracker for the total number of pulses.
     let mut pulse_counter = PulseCounter::new();
+
+    // Perform button presses.
     for _ in 0..n_button_presses {
         let mut pulses = VecDeque::from_iter([PulseMsg {
             from: "button".to_string(),
@@ -300,7 +304,7 @@ pub fn puzzle_1(input: &str, n_button_presses: u32) -> Result<u32, PuzzleErr> {
         pulse_counter.low += 1;
         while !pulses.is_empty() {
             let pulse = pulses.pop_front().unwrap();
-            log::debug!("PULSE: {:?}", pulse);
+            log::trace!("PULSE: {:?}", pulse);
             if let Some(response) = match modules.get_mut(&pulse.to) {
                 Some(Module::B(b)) => b.receive(&pulse),
                 Some(Module::C(c)) => c.receive(&pulse),
@@ -308,17 +312,16 @@ pub fn puzzle_1(input: &str, n_button_presses: u32) -> Result<u32, PuzzleErr> {
                 Some(Module::O(o)) => o.receive(&pulse),
                 None => None,
             } {
-                log::debug!("Received {} responses.", response.len());
+                log::trace!("Received {} responses.", response.len());
                 response.into_iter().for_each(|r| {
                     log::trace!("RESPONSE: {:?}", r);
                     pulse_counter.track(&r);
                     pulses.push_back(r);
                 });
-            } else {
-                log::debug!("No responses.")
             }
         }
     }
+
     log::info!(
         "Final counts: {} low, {} high",
         pulse_counter.low,
@@ -327,12 +330,91 @@ pub fn puzzle_1(input: &str, n_button_presses: u32) -> Result<u32, PuzzleErr> {
     Ok(pulse_counter.low * pulse_counter.high)
 }
 
+pub fn puzzle_2(input: &str) -> Result<u64, PuzzleErr> {
+    // Parse modules from input.
+    let mut modules = parse_input(input)?;
+
+    // Get the input module for "rx" module.
+    let rx_input = modules
+        .values()
+        .filter(|m| match m {
+            Module::C(c) => c.receivers.contains(&"rx".to_string()),
+            _ => false,
+        })
+        .collect::<Vec<_>>()
+        .first()
+        .cloned()
+        .unwrap();
+    log::info!("'rx' module input: {:?}", rx_input);
+
+    // Dict for the memory inputs of the "rx" input.
+    // Will count how many button presses until set "HIGH".
+    let rx_input_inputs = match rx_input {
+        Module::C(c) => Ok(c.memory.keys().cloned().collect::<HashSet<_>>()),
+        _ => Err(PuzzleErr::Part2ExpectationViolated),
+    }?;
+    log::info!("inputs to 'rx' input: {:?}", rx_input_inputs);
+    let mut rx_input_presses = HashMap::<String, u32>::new();
+
+    for num_presses in 1..u32::MAX {
+        let mut pulses = VecDeque::from_iter([PulseMsg {
+            from: "button".to_string(),
+            to: "broadcaster".to_string(),
+            pulse: Pulse::Low,
+        }]);
+        while !pulses.is_empty() {
+            let pulse = pulses.pop_front().unwrap();
+
+            // Record num. button presses for HIGH pulses from inputs to input of "rx".
+            if (pulse.pulse == Pulse::High)
+                & rx_input_inputs.contains(&pulse.from)
+                & !rx_input_presses.contains_key(&pulse.from)
+            {
+                log::info!(
+                    "Recording {} presses for module {}",
+                    num_presses,
+                    pulse.from
+                );
+                rx_input_presses.insert(pulse.from.clone(), num_presses);
+            }
+
+            // All inputs to the input for "rx" found a HIGH pulse.
+            if rx_input_inputs
+                .iter()
+                .all(|i| rx_input_presses.contains_key(i))
+            {
+                log::info!(
+                    "Found button presses for all 'rx' input inputs: {:?}.",
+                    rx_input_presses
+                );
+                return Ok(math_utils::lcm(
+                    rx_input_presses
+                        .values()
+                        .map(|x| *x as u64)
+                        .collect::<Vec<_>>(),
+                ));
+            }
+
+            // Send pulse and add responses to queue.
+            if let Some(response) = match modules.get_mut(&pulse.to) {
+                Some(Module::B(b)) => b.receive(&pulse),
+                Some(Module::C(c)) => c.receive(&pulse),
+                Some(Module::F(f)) => f.receive(&pulse),
+                Some(Module::O(o)) => o.receive(&pulse),
+                None => None,
+            } {
+                response.into_iter().for_each(|r| pulses.push_back(r));
+            }
+        }
+    }
+    unreachable!();
+}
+
 pub fn main(data_dir: &str) {
     println!("Day 20: Pulse Propagation");
     let data = load(data_dir, 20, None);
 
     // Puzzle 1.
-    let _ = env_logger::try_init();
     let answer_1 = puzzle_1(&data, 1000);
     match answer_1 {
         Ok(x) => println!(" Puzzle 1: {}", x),
@@ -341,10 +423,10 @@ pub fn main(data_dir: &str) {
     assert_eq!(answer_1, Ok(944750144));
 
     // Puzzle 2.
-    // let answer_2 = puzzle_2(&data);
-    // match answer_2 {
-    //     Ok(x) => println!(" Puzzle 2: {}", x),
-    //     Err(e) => panic!("No solution to puzzle 2: {}", e),
-    // }
-    // assert_eq!(answer_2, Ok(30449))
+    let answer_2 = puzzle_2(&data);
+    match answer_2 {
+        Ok(x) => println!(" Puzzle 2: {}", x),
+        Err(e) => panic!("No solution to puzzle 2: {}", e),
+    }
+    assert_eq!(answer_2, Ok(222718819437131))
 }
