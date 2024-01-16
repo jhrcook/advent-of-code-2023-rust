@@ -1,5 +1,7 @@
 mod data;
+mod math_utils;
 pub mod solutions;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]

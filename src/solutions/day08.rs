@@ -1,6 +1,6 @@
 use crate::data::load;
+use crate::math_utils;
 use lazy_static::lazy_static;
-use num::integer::div_floor;
 use regex::Regex;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
@@ -193,15 +193,6 @@ fn make_state_map(
     }
 }
 
-// Algorithm source: https://www.geeksforgeeks.org/lcm-of-given-array-elements/
-fn lcm(a: Vec<u64>) -> u64 {
-    let mut lcm = a[0];
-    for i in a.iter() {
-        lcm = div_floor(lcm * *i, num::integer::gcd(lcm, *i));
-    }
-    lcm
-}
-
 pub fn puzzle_2(input: &str) -> Result<u64, PuzzleErr> {
     let (directions, graph) = parse_input(input)?;
 
@@ -224,10 +215,9 @@ pub fn puzzle_2(input: &str) -> Result<u64, PuzzleErr> {
         .map(|n| make_state_map(n, &end_nodes, &graph, directions.clone()))
         .collect::<Vec<_>>();
 
-    Ok(lcm(state_maps
-        .iter()
-        .map(|sm| sm.loop_size as u64)
-        .collect()))
+    Ok(math_utils::lcm(
+        state_maps.iter().map(|sm| sm.loop_size as u64).collect(),
+    ))
 }
 
 pub fn main(data_dir: &str) {
