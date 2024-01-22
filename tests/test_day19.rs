@@ -1,4 +1,4 @@
-use aoc_2023::solutions::day19::{puzzle_1, puzzle_2};
+use aoc_2023::solutions::day19::puzzle_1;
 
 const EXAMPLE_INPUT_1: &str = "
 px{a<2006:qkq,m>2090:A,rfg}
