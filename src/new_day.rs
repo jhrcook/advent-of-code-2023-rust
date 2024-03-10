@@ -64,11 +64,7 @@ fn write_test_file(day: &usize) -> Result<(), Error> {
 
 fn add_day_to_mod_list(day: &usize) -> Result<(), Error> {
     let fname = "src/solutions/mod.rs";
-    let mut file = OpenOptions::new()
-        .write(true)
-        .append(true)
-        .open(fname)
-        .unwrap();
+    let mut file = OpenOptions::new().append(true).open(fname).unwrap();
 
     let text = format!("pub mod day{:02};", day);
     writeln!(file, "{}", text).or_else(|e| Err(Error::Write(e)))
